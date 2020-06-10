@@ -39,6 +39,13 @@ public class SparkConfig {
                 .set("spark.worker.memory",sparkWorkerMemory)//"26g".set("spark.shuffle.memoryFraction","0") //默认0.2
                 .set("spark.executor.memory",sparkExecutorMemory)
                 .set("spark.rpc.message.maxSize",sparkRpcMessageMaxSize)
+				//added by jay
+                .set("spark.executor.cores","2")
+				.set("spark.driver.cores","2")
+
+//				.set("spark.dynamicAllocation.enabled","true")
+//				.set("spark.executor.instances","1")
+
 				.set("spark.serializer","org.apache.spark.serializer.KryoSerialize")
 				.registerKryoClasses((Class<ConsumerRecord>[] ) Arrays.asList(ConsumerRecord.class).toArray());
 		// .setMaster("local[*]");//just use in test
