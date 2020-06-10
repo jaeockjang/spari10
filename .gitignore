@@ -43,3 +43,5 @@ secrets.yml
 .sts4-cache
 node_modules
 .dist/
+.idea
+.spari10
