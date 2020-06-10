@@ -1,0 +1,117 @@
+#########################################################
+###
+##
+1. Json을 추적할 수 있도록 tx Number 발행
+2. Json의 문서코드를 발행하여 Sql등의 조건문으로 사용
+
+
+https://www.amd.com/en/support/kb/release-notes/rn-amdgpu-unified-linux-20-10
+
+
+/home/jojang/dev/tools/spark
+
+spark://jojang-lenovo:7077
+
+
+spark-shell --master spark://jojang-lenovo:7077
+
+
+  cd $SPARK_HOME
+  ./sbin/start-master.sh
+  ./sbin/start-slave.sh spark://jojang-lenovo:7077
+
+https://kafka.apache.org/quickstart
+
+
+
+
+spark-shell --packages org.apache.spark:spark-sql-kafka-0-10_2.12:2.4.3 --master spark://jojang-lenovo:7077
+
+
+val kafkaDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("subscribe", "test").load()
+
+val kafka_df = spark.readStream.format("kafka").option("subscribe", "topic").option("kafka.bootstrap.servers", "localhost:9092").load()
+
+
+val kd = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "localhost:9092").option("subscribe", "test").option("startingOffsets","earliest").load()
+
+
+
+### 주키퍼 포트확인
+netstat -ntlp | grep 2181
+### 카프카 포트확인
+netstat -ntlp | grep 9092
+netstat -ntlp | grep 8080
+
+val inputLines = spark.readStream.format("socket").option("host", "localhost").option("port", 9999).load()
+
+#work 추가
+./bin/spark-class org.apache.spark.deploy.worker.Worker spark://jojang-lenovo:7077
+
+https://stackoverflow.com/questions/17335728/connect-to-host-localhost-port-22-connection-refused
+
+SPARK_WORKER_INSTANCES=2 SPARK_WORKER_CORES=2  ./sbin/start-slaves.sh spark://jojang-lenovo:7077
+
+
+
+sudo docker run -p 9080:8080 --rm --name zeppelin apache/zeppelin:0.9.0
+
+
+nohup ./bin/spark-class org.apache.spark.deploy.worker.Worker spark://jojang-lenovo:7077 &
+
+
+GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost' IDENTIFIED BY '12345678' WITH GRANT OPTION;
+?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092 test
+
+./bin/spark-shell --packages org.apache.spark:spark-sql-kafka-0-10_2.12:2.5.0
+
+ ./bin/spark-shell --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.0-preview2 --master spark://jojang-lenovo:7077
+
+
+ val kafkaParams = Map[String, Object](
+  "bootstrap.servers" -> "localhost:9092",
+  "key.deserializer" -> classOf[StringDeserializer],
+  "value.deserializer" -> classOf[StringDeserializer],
+  "group.id" -> "use_a_separate_group_id_for_each_stream",
+  "auto.offset.reset" -> "latest",
+  "enable.auto.commit" -> (false: java.lang.Boolean)
+)
+
+val conf = new SparkConf().setAppName("tttt).setMaster("spark://jojang-lenovo:7077")
+val streamingContext = new StreamingContext(conf, Seconds(1))
+
+##################################################################################Scala
+#################################################################################
+val kafkaBrokers="localhost:9092"
+val kafkaTopic="topic"
+val kafkaDF = spark.readStream.format("kafka").option("kafka.bootstrap.servers", kafkaBrokers)  .option("subscribe", kafkaTopic).option("startingOffsets", "earliest").option("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer").option("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer") .load()
+
+kafkaDF.select($"value".cast("string").alias("value") )
+
+import org.apache.spark.sql.streaming.Trigger
+
+kafkaDF.writeStream.format("console").outputMode("append").trigger(Trigger.ProcessingTime("0.2 seconds")).start
+
+##### ...
+
+kafkaDF.writeStream.format("parquet").outputMode("append").trigger(Trigger.ProcessingTime("10 seconds")).option("path","/home/jojang/data/t1.parquet").option("checkpointLocation","/home/jojang/data/tmp/t1").start
+
+val l= spark.read.parquet("/home/jojang/data/t1.parquet")
+l.show
+
+##
+
+0
+
+your need add this jars in the $SPARK_HOME/JARS
+
+commons-pool2-2.8.0.jar
+kafka-clients-2.5.0.jar
+spark-sql-kafka-0-10_2.12-3.0.0-preview2.jar
+spark-token-provider-kafka-0-10_2.12-3.0.0-preview2.jar
+
+####반드시 넣어야 함...
+spark-token-provider-kafka-0-10_2.12-3.0.0-preview2.jar
+kafka-clients-2.5.0.jar
